@@ -43,6 +43,7 @@ This is an exhaustive list of the different modules that will have to be impleme
 	6. Drawing box
 	
 	- Can draw a square or a rectangle inside the container (only for video or image display)
+	- Link the output of the box to an image display
 
 	7. Segmenter
 	
