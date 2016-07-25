@@ -37,7 +37,8 @@ This is an exhaustive list of the different modules that will have to be impleme
 
 	5. Text editor
 
-	- Edit anything that is in the Text display
+	- Edit anything that can be in the Text display
+	- Highlight part the text and annotate it
 	
 	6. Drawing box
 	
