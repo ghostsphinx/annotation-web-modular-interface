@@ -11,24 +11,59 @@ The architecture will be a classical MVC (Model-View-Controller), and the purpos
 
 This is an exhaustive list of the different modules that will have to be implemented.
 
-	1.	Video player
-
-	2.	Image display
-
-	3.	Sound waveform display
-
-	4.	Text display
-
-	5.	Text editor
-
-	6.	Drawing box
-
-	7.	Segmenter
-
-	8.	Labelling window
-
-	9.	Labelling parser
-
-	10.	Audio/video controller
+	1. Video player
 	
+	- Load a video with the source (URL)
+	- Autoplay
+	- Loop
+	- Time display
+
+	2. Image display
+	
+	- Load an image with the source (URL or URI)
+
+	3. Sound waveform display/controller
+	
+	- Load a waveform with audio source (URL)
+	- Zoom in and out the waveform for a clearer display
+	- Play/Pause
+	- Volume control
+	- Seek inside the waveform
+	- Time display
+
+	4. Text display
+	
+	- Load a text with the source
+
+	5. Text editor
+
+	- Edit anything that is in the Text display
+	
+	6. Drawing box
+	
+	- Can draw a square or a rectangle inside the container (only for video or image display)
+
+	7. Segmenter
+	
+	A container with segment representation over time from the media (video or audio)
+	
+	- Cut the whole segment into several
+	- Remove a segment
+	- Restart from the beginning
+	- Play the selected segment
+
+	8. Labelling window
+	
+	- Edit or create a label that will act as an annotation
+
+	9. Labelling parser
+	
+	Fusion of the segmenter and the labelling window.
+	Segmenter display with the new option: annotate segments
+
+	10. Video controller
+	
+	- Play/Pause
+	- Seek in the video
+	- Volume control
 	
