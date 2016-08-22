@@ -4,7 +4,7 @@
 
 	This interface will be an annotation interface of multimedia contents (audio, video, text…), but with the specificity to be modulable, modules will be available and future developers will just have to implement the main structure and import modules according to their needs.
 	The main specification will be that the modules can synchronize with each other can interact with the server. We want to keep a collaborative aspect, this means that data are shared, modifications included, and make the whole application responsive.
-	The architecture will be a classical MVC (Model-View-Controller), and the purpose of the project is to use frameworks for each module and made them work together.
+	The architecture will be a classic MVC (Model-View-Controller), and the purpose of the project is to use frameworks for each module and made them work together.
 
 
 2. Modules
@@ -40,13 +40,8 @@
 
 		- Edit anything that can be in the Text display
 		- Highlight part of the text and annotate it
-	
-	6. Drawing box
-	
-		- Can draw a square or a rectangle inside the container (only for video or image display)
-		- Link the output of the box to an image display
 
-	7. Segmenter
+	6. Segmenter
 	
 		A container with segment representation over time from the media (video or audio)
 	
@@ -55,18 +50,46 @@
 		- Restart from the beginning
 		- Play the selected segment
 
-	8. Labelling window
+	7. Labelling window
 	
 		- Edit or create a label that will act as an annotation
 
-	9. Labelling parser
+	8. Labelling parser
 	
 		Fusion of the segmenter and the labelling window.
 		Segmenter display with the new option: annotate segments
 
-	10. Video controller
+	9. Video controller
 	
 		- Play/Pause
 		- Seek in the video
 		- Volume control
-		- Volume control
+
+3. Modules synchronisation
+
+	The first module, video displayer is very important, it represents the major format of the media that is annotated.
+	There is an interaction with the segmenter, the segmenter can record a start and an ending point inside the video (example: the task is to select a part of the video where the annotator can see something that is known)
+	The interaction with the labelling parser is like the interaction with the segmenter.
+	The primary interaction is with the video controller.
+	
+	The second module, image displayer, doesn't have any direct interaction with any module (but we can consider it as a container for preview image for video).
+	
+	The third module is himself a fusion of a displayer and controller for the waveform, they will separated if needed.
+	This module have the same interactions than the video displayer.
+	
+	The fourth module, text displayer, might be the simplest one, but have different interactions.
+	Highlighting part of the text would serve as segmenter.
+	Annotations will be done by adding labelling windows on the highlighted parts or to the whole text.
+	
+	The fifth module, text editor, will have the same interactions than the fourth module, but with the possibility to correct the original text (with a different color by example).
+	
+	These are simple interactions, more complex interactions could be found as well.
+	
+4. Modules interaction with the server
+
+	For now, this interface will be used for the Camomile project (https://github.com/camomile-project), meaning that this interface will be related to the Camomile server.
+	This information must be taken account in the development.
+
+	
+
+	
