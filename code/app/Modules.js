@@ -26,18 +26,7 @@ class Header extends React.Component {
   }
 
   login() {
-  	this.props.login(localStorage.getItem('user'),localStorage.getItem('pwd'))
-  	/*.then(function(log){
-  		console.log("log: "+log)
-  		if (log) {
-  			console.log("success log");
-    		console.log('logged in as ' + localStorage.getItem('user'));
-    		localStorage.setItem('auth',localStorage.getItem('user'));
-    		localStorage.removeItem('user');
-    		localStorage.removeItem('pwd');
-    	}
-    	else console.log('fail to log in');
-  	})*/;
+  	this.props.login(localStorage.getItem('user'),localStorage.getItem('pwd'));
   }
 
   logout() {
@@ -50,7 +39,6 @@ class Header extends React.Component {
 
   reveal(){
   	console.log("auth: "+localStorage.getItem("auth"));
-  	console.log("isAuth(): "+this.isAuth());
   }
 
   render() {
@@ -119,16 +107,17 @@ class CamomileService extends React.Component{
         	body: blob
    		};
    		var url = localStorage.getItem('api')+'/login';
-    	var req = fetch(url,options);
-    	var res = req.then(function(response){
-    		if (response.ok){
-    			console.log("response: "+response);
-    			var res = response.text()
-    			console.log("response.text(): "+res);
-    			return res;
-    		}
-    	});
-    	var logged = res.then(function(myresponse){
+    	var req = fetch(url,options)
+
+    	.then(function(response){
+    		console.log("response: "+response);
+    		var restext = response.text()
+    		console.log("response.text(): "+restext);
+    		return restext;
+
+    	})
+
+    	.then(function(myresponse){
     		console.log("text response: "+myresponse);
     		var res = JSON.parse(myresponse);
     		console.log("parsed response: "+res.success);
@@ -140,7 +129,9 @@ class CamomileService extends React.Component{
     			localStorage.removeItem('pwd');
     		}
     		else console.log('fail to log in');
-    	});
+    	})
+    	.catch(console.log.bind(console));
+
   	}
 
   	logout() {
