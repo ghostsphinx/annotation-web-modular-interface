@@ -8,8 +8,8 @@ class Header extends React.Component {
       password: ''
     }
     this.login = this.login.bind(this);
+    this.loginClick = this.loginClick.bind(this);
     this.logout = this.logout.bind(this);
-    this.reveal = this.reveal.bind(this);
   }
 
   handleChangeUser(e){
@@ -21,24 +21,26 @@ class Header extends React.Component {
 
   handleChangePassword(e){
   	localStorage.removeItem('pwd');
-  	localStorage.setItem('pwd',e.target.value);
+    localStorage.setItem('pwd',e.target.value);
   	this.setState({password: e.target.value});
   }
 
   login() {
-  	this.props.login(localStorage.getItem('user'),localStorage.getItem('pwd'));
+    this.props.login(localStorage.getItem('user'),localStorage.getItem('pwd'));
+  }
+
+  loginClick(e){
+    if(e.keyCode==13) this.props.login(localStorage.getItem('user'),localStorage.getItem('pwd'));
   }
 
   logout() {
   	this.props.logout();
     localStorage.removeItem('auth');
     this.setState({authenticated: false});
+    localStorage.removeItem('user');
+    localStorage.removeItem('pwd');
     this.setState({user: ''});
     this.setState({password: ''});
-  }
-
-  reveal(){
-  	console.log("auth: "+localStorage.getItem("auth"));
   }
 
   render() {
@@ -56,24 +58,23 @@ class Header extends React.Component {
             </div>
             <div className="navbar-collapse collapse">
                 { !this.state.authenticated ? (
-            		<form name="login-form" autoComplete="on" className="navbar-form navbar-right" method="post">
+            		<div name="login-window" autoComplete="on" className="navbar-form navbar-right">
                 		<div className="form-group">
                 			<input id="login" name="login" type="text" value={this.state.user} onChange={this.handleChangeUser.bind(this)} autoComplete="on" placeholder="Login" className="form-control" style={{width:160+'px'}}/>
                 		</div>
                 		<div className="form-group">
-                    		<input id="password" name="password" type="password" value={this.state.password} onChange={this.handleChangePassword.bind(this)} autoComplete="on" placeholder="Password" className="form-control" style={{width:160+'px'}}/>
+                    		<input id="password" name="password" type="password" value={this.state.password} onChange={this.handleChangePassword.bind(this)} onKeyUp={this.loginClick} autoComplete="on" placeholder="Password" className="form-control" style={{width:160+'px'}}/>
                 		</div>
-                		<button type="submit" className="btn btn-success" onClick={this.login}>Sign in</button>
-            		</form>
+                		<button type="button" className="btn btn-success" onClick={this.login} >Sign in</button>
+            		</div>
           		) : (
           			<form name="logout-form" autoComplete="on" className="navbar-form navbar-right">
-            			<button type="submit" className="btn btn-danger" onClick={this.logout}>
+            			<button type="button" className="btn btn-danger" onClick={this.logout}>
                 			<span className="glyphicon glyphicon-off" aria-hidden="true"></span>
                 			Logout
             			</button>
             		</form>
       			)}
-      			<button onClick={this.reveal}> Reveal</button>
             </div>
         </div>
       </div>
@@ -96,7 +97,7 @@ class CamomileService extends React.Component{
 
 	constructor(){
 		super();
-		localStorage.setItem('api','http://camomile.mediaeval.niderb.fr')
+		localStorage.setItem('api','http://camomile.mediaeval.niderb.fr');
 	}
 
 	login(user,pwd) {
@@ -107,31 +108,23 @@ class CamomileService extends React.Component{
         	body: blob
    		};
    		var url = localStorage.getItem('api')+'/login';
-    	var req = fetch(url,options)
 
+    	var my = this;
+      fetch(url,options)
     	.then(function(response){
-    		console.log("response: "+response);
     		var restext = response.text()
-    		console.log("response.text(): "+restext);
     		return restext;
-
-    	})
-
-    	.then(function(myresponse){
-    		console.log("text response: "+myresponse);
-    		var res = JSON.parse(myresponse);
-    		console.log("parsed response: "+res.success);
-    		if (Object.keys(res)[0]!='error') {
-    			console.log("success log");
-    			console.log('logged in as ' + localStorage.getItem('user'));
-    			localStorage.setItem('auth',localStorage.getItem('user'));
-    			localStorage.removeItem('user');
-    			localStorage.removeItem('pwd');
-    		}
-    		else console.log('fail to log in');
-    	})
-    	.catch(console.log.bind(console));
-
+      })
+      .then(function(myresponse){
+    			var res = JSON.parse(myresponse);
+          var event = new Event("auth");
+    			if (Object.keys(res)[0]!='error') {
+    				console.log('logged in as ' + localStorage.getItem('user'));
+    				localStorage.setItem('auth',localStorage.getItem('user'));
+            my.refs.header.setState({authenticated:true});
+    			}
+    			else console.log('fail to log in');
+    	});
   	}
 
   	logout() {
@@ -147,7 +140,7 @@ class CamomileService extends React.Component{
 
   	render(){
   		return(
-  			<Header login={this.login} logout={this.logout.bind(this)}/>
+  			<Header ref="header" login={this.login.bind(this)} logout={this.logout.bind(this)}/>
   		);
   	}
 }
