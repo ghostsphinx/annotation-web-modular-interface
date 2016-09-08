@@ -33,7 +33,7 @@ var port = 8070;
 app.configure(function () {
     app.use(express.methodOverride());
     app.use(express.bodyParser());
-    app.use(express.static(__dirname + '/app'));
+    app.use(express.static(__dirname + "/app"));
     app.use(app.router);
 });
 
@@ -158,46 +158,6 @@ function create_config_route(queues, callback) {
     callback(null);
 
 }
-
-
-// create AngularJS module 'Config' in /app/config.js ('DataRoot' + 'ToolRoot')
-// and callback (passing no results whatsoever)
-// WARNING: this should be deprecated in favor of route "GET /config"
-function create_config_file(callback) {
-
-    // ~~~~ Sample /app/config.js ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    //     angular.module('myApp.config', [])
-    //         .value('DataRoot', 'http://camomile.fr/api')
-    //         .value('ToolRoot', 'http://pyannote.lu');
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    async.waterfall([
-        function(callback){
-            config_js = sprintf(
-                "angular.module('myApp.config', [])" + "\n" +
-                "   .value('DataRoot', '%s')",
-                camomile_api//, list
-            );
-            callback(null,config_js);
-        },
-        function(config_js, callback){
-            fs.writeFile(
-                __dirname + '/app/config.js', config_js,
-                function (err) {
-                    if (err) {
-                        console.log(err);
-                    } else {
-                        callback(null);
-                    }
-                }
-            );
-        }
-        ],function(err, results){
-            //nothing to do
-        }
-    );
-    callback(null);
-};
 
 var get_get_corpus_id = function(name){
     return function(callback){
@@ -331,6 +291,6 @@ function run_app(err, results) {
 // log in, create queues, create route /config, log out, create /app/config.js
 // and (then only) run the app
 async.waterfall(
-    [log_in, getAllQueues, create_config_route, create_config_file, log_out],
+    [log_in, getAllQueues, create_config_route, log_out],
     run_app
 );
