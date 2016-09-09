@@ -82,12 +82,11 @@ class Header extends React.Component {
   }
 }
 
-
 class Footer extends React.Component {
 	render(){
 		return(
-			<div class="container">
-            	<p class="text-muted credit"><a href="http://camomile.limsi.fr/">Camomile Project</a></p>
+			<div className="container">
+            	<p className="text-muted credit"><a href="http://camomile.limsi.fr/">Camomile Project</a></p>
         	</div>
 		);
 	}
@@ -140,7 +139,10 @@ class CamomileService extends React.Component{
 
   	render(){
   		return(
-  			<Header ref="header" login={this.login.bind(this)} logout={this.logout.bind(this)}/>
+        <div>
+  		    <Header ref="header" login={this.login.bind(this)} logout={this.logout.bind(this)}></Header>
+          <Footer></Footer>
+        </div>
   		);
   	}
 }
