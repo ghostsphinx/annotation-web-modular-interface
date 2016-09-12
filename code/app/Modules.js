@@ -1,3 +1,56 @@
+//---------------------TITLE OF THE HEADER MODULE-------------------------------------------
+
+class Title extends React.Component{
+  render(){
+    return(
+        <div className="navbar-header">
+          <button type="button" className="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+            <span className="sr-only">Toggle navigation</span>
+            <span className="icon-bar"></span>
+            <span className="icon-bar"></span>
+            <span className="icon-bar"></span>
+          </button>
+          <a className="navbar-brand" href="#">MediaEval Frontend Dev</a>
+        </div>
+    );
+  }
+}
+
+//---------------------------LOGIN MODULE------------------------------------------
+class Login extends React.Component{
+  render(){
+    return(
+      <div name="login-window" autoComplete="on" className="navbar-form navbar-right">
+        <div className="form-group">
+          <input id="login" name="login" type="text" value={this.props.user} onChange={this.props.handleChangeUser.bind(this)} autoComplete="on" placeholder="Login" className="form-control" style={{width:160+'px'}}/>
+        </div>
+        <div className="form-group">
+          <input id="password" name="password" type="password" value={this.props.password} onChange={this.props.handleChangePassword.bind(this)} onKeyUp={this.props.loginClick} autoComplete="on" placeholder="Password" className="form-control" style={{width:160+'px'}}/>
+        </div>
+          <button type="button" className="btn btn-success" onClick={this.props.login} >Sign in</button>
+      </div>
+    );
+  }
+}
+
+//---------------------------------LOGOUT MODULE------------------------------------
+class Logout extends React.Component{
+  render(){
+    return(
+      <div>
+        <form name="logout-form" autoComplete="on" className="navbar-form navbar-right">
+          <button type="button" className="btn btn-danger" onClick={this.props.logout.bind(this)}>
+            <span className="glyphicon glyphicon-off" aria-hidden="true"></span>
+            Logout
+          </button>
+        </form>
+      </div>
+    );
+  }
+
+}
+
+//--------------------------HEADER MODULE-----------------------------------------------
 class Header extends React.Component {
 
   constructor() {
@@ -7,9 +60,6 @@ class Header extends React.Component {
       user: '',
       password: ''
     }
-    this.login = this.login.bind(this);
-    this.loginClick = this.loginClick.bind(this);
-    this.logout = this.logout.bind(this);
   }
 
   handleChangeUser(e){
@@ -47,33 +97,12 @@ class Header extends React.Component {
     return (
       <div className="navbar navbar-inverse navbar-fixed-top" role="navigation">
         <div className="container">
-            <div className="navbar-header">
-                <button type="button" className="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-                    <span className="sr-only">Toggle navigation</span>
-                    <span className="icon-bar"></span>
-                    <span className="icon-bar"></span>
-                    <span className="icon-bar"></span>
-                </button>
-                <a className="navbar-brand" href="#">MediaEval Frontend Dev</a>
-            </div>
+            <Title/>
             <div className="navbar-collapse collapse">
                 { !this.state.authenticated ? (
-            		<div name="login-window" autoComplete="on" className="navbar-form navbar-right">
-                		<div className="form-group">
-                			<input id="login" name="login" type="text" value={this.state.user} onChange={this.handleChangeUser.bind(this)} autoComplete="on" placeholder="Login" className="form-control" style={{width:160+'px'}}/>
-                		</div>
-                		<div className="form-group">
-                    		<input id="password" name="password" type="password" value={this.state.password} onChange={this.handleChangePassword.bind(this)} onKeyUp={this.loginClick} autoComplete="on" placeholder="Password" className="form-control" style={{width:160+'px'}}/>
-                		</div>
-                		<button type="button" className="btn btn-success" onClick={this.login} >Sign in</button>
-            		</div>
+            		<Login user={this.state.user} password={this.state.password} login={this.login.bind(this)} loginClick={this.loginClick.bind(this)} handleChangeUser={this.handleChangeUser.bind(this)} handleChangePassword={this.handleChangePassword.bind(this)}/>
           		) : (
-          			<form name="logout-form" autoComplete="on" className="navbar-form navbar-right">
-            			<button type="button" className="btn btn-danger" onClick={this.logout}>
-                			<span className="glyphicon glyphicon-off" aria-hidden="true"></span>
-                			Logout
-            			</button>
-            		</form>
+          			<Logout logout={this.logout.bind(this)}/>
       			)}
             </div>
         </div>
@@ -82,6 +111,7 @@ class Header extends React.Component {
   }
 }
 
+//------------------------FOOTER MODULE------------------------------------------------
 class Footer extends React.Component {
 	render(){
 		return(
@@ -92,6 +122,7 @@ class Footer extends React.Component {
 	}
 }
 
+//--------------------------CAMOMILE SUPER MODULE---------------------------------------------
 class CamomileService extends React.Component{
 
 	constructor(){
@@ -145,15 +176,6 @@ class CamomileService extends React.Component{
         </div>
   		);
   	}
-}
-
-class GlobalInterface extends React.Component {
-
-	render(){
-		return(
-			<CamomileService/>
-		);
-	}
 }
 
 ReactDOM.render(
