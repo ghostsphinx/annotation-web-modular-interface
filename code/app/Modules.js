@@ -127,7 +127,7 @@ class Application extends React.Component{
   	render(){
   		return(
         <div>
-  		    <Header user={this.props.user} isAuth={this.props.isAuth}></Header>
+  		    <Header></Header>
           <Footer></Footer>
         </div>
   		);
@@ -138,7 +138,7 @@ class Application extends React.Component{
 //------------------ FINAL RENDER -------------------------------------
 
 ReactDOM.render(
-	<Application user={session.name} isAuth={session.isAuth}/>,
+	<Application/>,
 	document.getElementById('wrap')
 );
 
