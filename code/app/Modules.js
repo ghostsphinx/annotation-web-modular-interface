@@ -1,5 +1,4 @@
 //---------------------TITLE OF THE HEADER MODULE-------------------------------------------
-
 class Title extends React.Component{
   render(){
     return(
@@ -16,95 +15,95 @@ class Title extends React.Component{
   }
 }
 
-//---------------------------LOGIN MODULE------------------------------------------
-class Login extends React.Component{
-  render(){
-    return(
-      <div name="login-window" autoComplete="on" className="navbar-form navbar-right">
-        <div className="form-group">
-          <input id="login" name="login" type="text" value={this.props.user} onChange={this.props.handleChangeUser.bind(this)} autoComplete="on" placeholder="Login" className="form-control" style={{width:160+'px'}}/>
-        </div>
-        <div className="form-group">
-          <input id="password" name="password" type="password" value={this.props.password} onChange={this.props.handleChangePassword.bind(this)} onKeyUp={this.props.loginClick} autoComplete="on" placeholder="Password" className="form-control" style={{width:160+'px'}}/>
-        </div>
-          <button type="button" className="btn btn-success" onClick={this.props.login} >Sign in</button>
-      </div>
-    );
-  }
-}
+//---------------------------LOG MODULE------------------------------------------
+class Log extends React.Component{
 
-//---------------------------------LOGOUT MODULE------------------------------------
-class Logout extends React.Component{
-  render(){
-    return(
-      <div>
-        <form name="logout-form" autoComplete="on" className="navbar-form navbar-right">
-          <button type="button" className="btn btn-danger" onClick={this.props.logout.bind(this)}>
-            <span className="glyphicon glyphicon-off" aria-hidden="true"></span>
-            Logout
-          </button>
-        </form>
-      </div>
-    );
-  }
-
-}
-
-//--------------------------HEADER MODULE-----------------------------------------------
-class Header extends React.Component {
-
-  constructor() {
+  constructor(){
     super();
     this.state = {
-      authenticated: localStorage.getItem('auth') ? true : false,
+      authenticated: false,
       user: '',
       password: ''
-    }
+    };
+  }
+
+  componentWillMount(){
+    globalVar.callback = (data) => {
+      this.setState({authenticated:data.isAuth, user:data.name});     
+    };
   }
 
   handleChangeUser(e){
-  	localStorage.removeItem('user');
-  	localStorage.setItem('user',e.target.value);
-  	this.setState({user: e.target.value});
+    this.setState({user: e.target.value});
 
   }
 
   handleChangePassword(e){
-  	localStorage.removeItem('pwd');
-    localStorage.setItem('pwd',e.target.value);
-  	this.setState({password: e.target.value});
+    this.setState({password: e.target.value});
   }
 
-  login() {
-    this.props.login(localStorage.getItem('user'),localStorage.getItem('pwd'));
+  login(){
+    var me = this;
+    Camomile.login(this.state.user,this.state.password,function(){
+      console.log("login success");
+      me.setState({authenticated:true});
+    });
   }
 
-  loginClick(e){
-    if(e.keyCode==13) this.props.login(localStorage.getItem('user'),localStorage.getItem('pwd'));
+  loginPress(e){
+    if(e.keyCode==13){
+      this.login();
+    }
   }
 
-  logout() {
-  	this.props.logout();
-    localStorage.removeItem('auth');
-    this.setState({authenticated: false});
-    localStorage.removeItem('user');
-    localStorage.removeItem('pwd');
-    this.setState({user: ''});
-    this.setState({password: ''});
+  logout(){
+    var me = this;
+    Camomile.logout(function(){
+      console.log("logout success");
+      me.setState({authenticated:false});
+    });
   }
+
+  render(){
+    return(
+      <div className="navbar-collapse collapse">
+        { !this.state.authenticated ? (
+          <div name="login-window" autoComplete="on" className="navbar-form navbar-right">
+            <div className="form-group">
+              <input id="login" name="login" type="text" value={this.state.user} onChange={this.handleChangeUser.bind(this)} autoComplete="on" placeholder="Login" className="form-control" style={{width:160+'px'}}/>
+            </div>
+            <div className="form-group">
+              <input id="password" name="password" type="password" value={this.state.password} onChange={this.handleChangePassword.bind(this)} onKeyUp={this.loginPress.bind(this)} autoComplete="on" placeholder="Password" className="form-control" style={{width:160+'px'}}/>
+            </div>
+            <button type="button" className="btn btn-success" onClick={this.login.bind(this)} >Sign in</button>
+          </div>
+        ) : (
+          <div>
+            <form name="logout-form" autoComplete="on" className="navbar-form navbar-right">
+              <font color="white">
+                {this.state.user+' '}
+              </font>
+              <button type="button" className="btn btn-danger" onClick={this.logout.bind(this)}>
+                <span className="glyphicon glyphicon-off" aria-hidden="true"></span>
+                Logout
+              </button>
+            </form>
+          </div>
+        )}
+      </div>
+    );
+  }
+}
+
+//--------------------------HEADER MODULE-----------------------------------------------
+class Header extends React.Component {
 
   render() {
     return (
       <div className="navbar navbar-inverse navbar-fixed-top" role="navigation">
         <div className="container">
             <Title/>
-            <div className="navbar-collapse collapse">
-                { !this.state.authenticated ? (
-            		<Login user={this.state.user} password={this.state.password} login={this.login.bind(this)} loginClick={this.loginClick.bind(this)} handleChangeUser={this.handleChangeUser.bind(this)} handleChangePassword={this.handleChangePassword.bind(this)}/>
-          		) : (
-          			<Logout logout={this.logout.bind(this)}/>
-      			)}
-            </div>
+            <Log/>
         </div>
       </div>
     );
@@ -116,70 +115,30 @@ class Footer extends React.Component {
 	render(){
 		return(
 			<div className="container">
-            	<p className="text-muted credit"><a href="http://camomile.limsi.fr/">Camomile Project</a></p>
-        	</div>
+        <p className="text-muted credit"><a href="http://camomile.limsi.fr/">Camomile Project</a></p>
+      </div>
 		);
 	}
 }
 
-//--------------------------CAMOMILE SUPER MODULE---------------------------------------------
-class CamomileService extends React.Component{
-
-	constructor(){
-		super();
-		localStorage.setItem('api','http://camomile.mediaeval.niderb.fr');
-	}
-
-	login(user,pwd) {
-    	var blob = new Blob([JSON.stringify({'username': user,'password': pwd}, null, 2)], {type : 'application/json'});
-    	var options = {
-        	method: 'POST',
-        	credentials: "include",
-        	body: blob
-   		};
-   		var url = localStorage.getItem('api')+'/login';
-
-    	var my = this;
-      fetch(url,options)
-    	.then(function(response){
-    		var restext = response.text()
-    		return restext;
-      })
-      .then(function(myresponse){
-    			var res = JSON.parse(myresponse);
-          var event = new Event("auth");
-    			if (Object.keys(res)[0]!='error') {
-    				console.log('logged in as ' + localStorage.getItem('user'));
-    				localStorage.setItem('auth',localStorage.getItem('user'));
-            my.refs.header.setState({authenticated:true});
-    			}
-    			else console.log('fail to log in');
-    	});
-  	}
-
-  	logout() {
-  		var options = {
-        	method: 'POST',
-        	credentials: "include"
-    	};
-    	fetch(localStorage.getItem('api')+'/logout',options, true)
-    	.then(function(response){
-    		console.log("logged out");
-    	})
-  	}
+//--------------------------APPLICATION MODULE---------------------------------------------
+class Application extends React.Component{
 
   	render(){
   		return(
         <div>
-  		    <Header ref="header" login={this.login.bind(this)} logout={this.logout.bind(this)}></Header>
+  		    <Header user={this.props.user} isAuth={this.props.isAuth}></Header>
           <Footer></Footer>
         </div>
   		);
   	}
 }
 
+
+//------------------ FINAL RENDER -------------------------------------
+
 ReactDOM.render(
-	<CamomileService/>,
+	<Application user={session.name} isAuth={session.isAuth}/>,
 	document.getElementById('wrap')
 );
 
