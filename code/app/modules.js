@@ -45,8 +45,14 @@ class Log extends React.Component{
   login(){
     var me = this;
     Camomile.login(this.state.user,this.state.password,function(){
-      console.log("login success");
-      me.setState({authenticated:true, password:''});
+      Camomile.me(function (err, data) {
+        if (data.error) {
+          console.log("login failed");
+        } else {
+          console.log("login success");
+          me.setState({authenticated:true, password:''});
+        }
+      });
     });
   }
 
