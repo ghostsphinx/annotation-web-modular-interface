@@ -1,4 +1,3 @@
-var session = {name:"", isAuth:false};
 var globalVar = {};
 
 fetch('http://localhost:8070/config')
@@ -11,6 +10,7 @@ fetch('http://localhost:8070/config')
   if (Object.keys(res)[0]=='camomile_api') {
     Camomile.setURL(res.camomile_api);
     Camomile.me(function (err, data) {
+      var session = {name:"", isAuth:false};
       if (data.error) {
         session.name = '';
         session.isAuth = false;
