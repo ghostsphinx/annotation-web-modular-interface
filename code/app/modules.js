@@ -28,8 +28,9 @@ class Log extends React.Component{
   }
 
   componentWillMount(){
-    globalVar.callback = (data) => {
-      this.setState({authenticated:data.isAuth, user:data.name});     
+    var me = this;
+    globalVar.callback1 = (data) => {
+      me.setState({authenticated:data.isAuth, user:data.name});
     };
   }
 
@@ -51,6 +52,9 @@ class Log extends React.Component{
         } else {
           console.log("login success");
           me.setState({authenticated:true, password:''});
+          session.name = me.state.user;
+          session.isAuth = me.state.authenticated;
+          PubSub.publish('isAuth',session.isAuth);
         }
       });
     });
@@ -67,6 +71,9 @@ class Log extends React.Component{
     Camomile.logout(function(){
       console.log("logout success");
       me.setState({authenticated:false});
+      session.name = "";
+      session.isAuth = me.state.authenticated;
+      PubSub.publish('isAuth',false);
     });
   }
 
@@ -101,6 +108,26 @@ class Log extends React.Component{
   }
 }
 
+//----------------------------CORPUS SELECTION MODULE----------------------------------
+class CorpusSelection extends React.Component {
+
+  componentDidMount(){
+    var option = document.createElement("option");
+    option.value = 1;
+    option.innerHTML = "ceci est un test";
+    document.getElementById("corpus_selection").appendChild(option);
+  }
+
+  render(){
+    return(
+      <form>
+        <select id="corpus_selection">
+        </select>
+      </form>
+    );
+  }
+}
+
 //--------------------------HEADER MODULE-----------------------------------------------
 class Header extends React.Component {
 
@@ -116,12 +143,25 @@ class Header extends React.Component {
   }
 }
 
+//--------------------------ANNOTATION MODULE-----------------------------------------
+class Annotation extends React.Component {
+  render(){
+    return(
+      <div className="container">
+        <CorpusSelection/>
+      </div>
+    );
+  }
+}
+
 //------------------------FOOTER MODULE------------------------------------------------
 class Footer extends React.Component {
 	render(){
 		return(
-			<div className="container">
-        <p className="text-muted credit"><a href="http://camomile.limsi.fr/">Camomile Project</a></p>
+			<div className="navbar navbar-fixed-bottom">
+        <div className="container">
+          <p className="text-muted credit"><a href="http://camomile.limsi.fr/">Camomile Project</a></p>
+        </div>
       </div>
 		);
 	}
@@ -130,10 +170,33 @@ class Footer extends React.Component {
 //--------------------------APPLICATION MODULE---------------------------------------------
 class Application extends React.Component{
 
+    constructor(){
+      super();
+      this.state = {
+        authenticated: false
+      };
+    }
+
+    componentDidMount(){
+      var me = this;
+      globalVar.callback2 = (data) => {
+        this.setState({authenticated:data.isAuth});
+        var logSub = function( msg, data ){
+          me.setState({authenticated:data});
+        };
+        PubSub.subscribe('isAuth',logSub);
+      };
+    }
+
   	render(){
   		return(
         <div>
   		    <Header></Header>
+          { this.state.authenticated ? (
+            <Annotation></Annotation>
+          ) : (
+            <div></div>
+          )}
           <Footer></Footer>
         </div>
   		);
@@ -147,4 +210,3 @@ ReactDOM.render(
 	<Application/>,
 	document.getElementById('wrap')
 );
-
