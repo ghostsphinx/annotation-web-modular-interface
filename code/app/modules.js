@@ -48,9 +48,9 @@ class Log extends React.Component{
     Camomile.login(this.state.user,this.state.password,function(){
       Camomile.me(function (err, data) {
         if (data.error) {
-          console.log("login failed");
+          document.getElementById("alert_log_failed").innerHTML = "Wrong login ";
         } else {
-          console.log("login success");
+          document.getElementById("alert_log_failed").innerHTML = "";
           me.setState({authenticated:true, password:''});
           session.name = me.state.user;
           session.isAuth = me.state.authenticated;
@@ -69,7 +69,6 @@ class Log extends React.Component{
   logout(){
     var me = this;
     Camomile.logout(function(){
-      console.log("logout success");
       me.setState({authenticated:false});
       session.name = "";
       session.isAuth = me.state.authenticated;
@@ -82,6 +81,8 @@ class Log extends React.Component{
       <div className="navbar-collapse collapse">
         { !this.state.authenticated ? (
           <div name="login-window" autoComplete="on" className="navbar-form navbar-right">
+            <font id="alert_log_failed" color="red">
+            </font>
             <div className="form-group">
               <input id="login" name="login" type="text" value={this.state.user} onChange={this.handleChangeUser.bind(this)} autoComplete="on" placeholder="Login" className="form-control" style={{width:160+'px'}}/>
             </div>
@@ -111,17 +112,42 @@ class Log extends React.Component{
 //----------------------------CORPUS SELECTION MODULE----------------------------------
 class CorpusSelection extends React.Component {
 
+  constructor(){
+    super();
+    this.handleChangeCorpus = this.handleChangeCorpus.bind(this);
+  }
+
   componentDidMount(){
+    var options = {};
+    options.filter = "name";
     var option = document.createElement("option");
     option.value = 1;
-    option.innerHTML = "ceci est un test";
+    option.innerHTML = "--Choose a corpus--";
     document.getElementById("corpus_selection").appendChild(option);
+    Camomile.getCorpora(function(err, data){
+      var i;
+      for(i = 1; i < data.length; i++){
+        var option = document.createElement("option");
+        option.value = i+1;
+        option.innerHTML = data[i].name;
+        document.getElementById("corpus_selection").appendChild(option);
+      }
+    });
+  }
+
+  handleChangeCorpus(event){
+    var val = event.target.value-1;
+    if(val>0){
+      Camomile.getCorpora(function(err, data){
+        PubSub.publish('corpus_id', data[val]._id);
+      });
+    }
   }
 
   render(){
     return(
       <form>
-        <select id="corpus_selection">
+        <select id="corpus_selection" onChange={this.handleChangeCorpus}>
         </select>
       </form>
     );
