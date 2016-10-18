@@ -27,7 +27,7 @@ class Log extends React.Component{
     };
   }
 
-  componentWillMount(){
+  componentDidMount(){
     var me = this;
     globalVar.callback1 = (data) => {
       me.setState({authenticated:data.isAuth, user:data.name});
@@ -73,6 +73,8 @@ class Log extends React.Component{
       session.name = "";
       session.isAuth = me.state.authenticated;
       PubSub.publish('isAuth',false);
+      PubSub.publish('corpus_id','');
+      PubSub.publish('medium_id','');
     });
   }
 
@@ -118,8 +120,6 @@ class CorpusSelection extends React.Component {
   }
 
   componentDidMount(){
-    var options = {};
-    options.filter = "name";
     var option = document.createElement("option");
     option.value = 1;
     option.innerHTML = "--Choose a corpus--";
@@ -142,6 +142,7 @@ class CorpusSelection extends React.Component {
         PubSub.publish('corpus_id', data[val]._id);
       });
     }
+    else PubSub.publish('corpus_id', '');
   }
 
   render(){
@@ -150,6 +151,102 @@ class CorpusSelection extends React.Component {
         <select id="corpus_selection" onChange={this.handleChangeCorpus}>
         </select>
       </form>
+    );
+  }
+}
+
+//----------------------------MEDIUM SELECTION MODULE----------------------------------
+class MediumSelection extends React.Component {
+
+  constructor(){
+    super();
+    this.state = {
+      corpus_id:''
+    };
+    var sub;
+    this.handleChangeMedium = this.handleChangeMedium.bind(this);
+  }
+
+  componentDidMount(){
+    var option = document.createElement("option");
+    option.value = 1;
+    option.innerHTML = "--Choose a medium--";
+    document.getElementById("medium_selection").appendChild(option);
+    var me = this;
+    var corpusSub = function( msg, data ){
+      me.setState({corpus_id:data});
+    };
+    this.sub = PubSub.subscribe('corpus_id',corpusSub);
+  }
+
+  componentWillUnmount(){
+    PubSub.unsubscribe(this.sub);
+  }
+
+  componentDidUpdate(prevProps, prevState){
+    var options = {filter:{corpus_id:''}};
+    if(this.state.corpus_id!='' && prevState.corpus_id==''){
+      options.filter.id_corpus = this.state.corpus_id;
+      Camomile.getMedia(function(err, data){
+        var i;
+        for(i = 1; i < data.length; i++){
+          var option = document.createElement("option");
+          option.value = i+1;
+          option.innerHTML = data[i].name;
+          document.getElementById("medium_selection").appendChild(option);
+        }
+      },options);
+    }
+    else{
+      var i;
+      for(i = document.getElementById("medium_selection").options.length -1 ; i > 0; i--){
+        document.getElementById("medium_selection").remove(i);
+      }
+      if(this.state.corpus_id!=''){
+        options.filter.id_corpus = this.state.corpus_id;
+        Camomile.getMedia(function(err, data){
+          var i;
+          for(i = 1; i < data.length; i++){
+            var option = document.createElement("option");
+            option.value = i+1;
+            option.innerHTML = data[i].name;
+            document.getElementById("medium_selection").appendChild(option);
+          }
+        },options);
+      }
+    }
+  }
+
+  handleChangeMedium(event){
+    var val = event.target.value-1;
+    if(val>0){
+      Camomile.getMedia(function(err, data){
+        PubSub.publish('medium_id', data[val]._id);
+      });
+    }
+    else PubSub.publish('medium_id', '');
+  }
+
+  render(){
+    return(
+      <form>
+        <select id="medium_selection" onChange={this.handleChangeMedium}>
+        </select>
+      </form>
+    );
+  }
+}
+
+//-----------------------------VIDEO PLAYER MODULE----------------------------------------
+class VideoPlayer extends React.Component {
+
+  constructor(){
+    super();
+  }
+
+  render(){
+    return(
+      <div></div>
     );
   }
 }
@@ -175,6 +272,7 @@ class Annotation extends React.Component {
     return(
       <div className="container">
         <CorpusSelection/>
+        <MediumSelection/>
       </div>
     );
   }
@@ -201,6 +299,7 @@ class Application extends React.Component{
       this.state = {
         authenticated: false
       };
+      var sub;
     }
 
     componentDidMount(){
@@ -210,8 +309,12 @@ class Application extends React.Component{
         var logSub = function( msg, data ){
           me.setState({authenticated:data});
         };
-        PubSub.subscribe('isAuth',logSub);
+        this.sub = PubSub.subscribe('isAuth',logSub);
       };
+    }
+
+    componentWillUnmount(){
+      PubSub.unsubscribe(this.sub);
     }
 
   	render(){
