@@ -292,13 +292,16 @@ var VideoVolumeButton = React.createClass({
   },
   render: function(){
     var volumeLevel = this.props.volumeLevel, level;
+    if(!this.props.muted){
       if (volumeLevel <= 0){
         level = 'muted';
-      }else if (volumeLevel > 0 && volumeLevel <= 0.53){
+      }else if (volumeLevel > 0 && volumeLevel <= 0.5){
         level = 'low';
       }else{
         level = 'high';
       }
+    }
+    else level = 'muted';
 
     var sound_levels = {
       'muted': 'glyphicon glyphicon-volume-off',
@@ -428,9 +431,9 @@ var VideoPlayer = React.createClass({
       playing: !this.state.playing
     }, function(){
       if (this.state.playing){
-        document.getElementById("video").play()
+        document.getElementById("video").play();
       }else{
-        document.getElementById("video").pause()
+        document.getElementById("video").pause();
       }
     });
   },
@@ -452,7 +455,7 @@ var VideoPlayer = React.createClass({
     this.setState({
       muted: !this.state.muted
     }, function(){
-      document.getElementById("video").muted = this.state.muted
+      document.getElementById("video").muted = this.state.muted;
     });
   },
   toggleFullscreen: function(){
@@ -460,32 +463,32 @@ var VideoPlayer = React.createClass({
       fullScreen: !this.state.fullScreen
     }, function(){
       if (this.state.fullScreen){
-      var docElm = document.documentElement;
-      if(docElm.requestFullscreen){
-      document.getElementById("video_player").requestFullscreen();
-      }     
-      if(docElm.webkitRequestFullScreen){
-      document.getElementById("video_player").webkitRequestFullScreen();
-      }
-      if(docElm.mozRequestFullScreen){
-     document.getElementById("video_player").mozRequestFullScreen();
-      }
-      if(docElm.msRequestFullscreen){
-      document.getElementById("video_player").msRequestFullscreen();
-      }
+        var docElm = document.documentElement;
+        if(docElm.requestFullscreen){
+          document.getElementById("video_player").requestFullscreen();
+        }     
+        if(docElm.webkitRequestFullScreen){
+          document.getElementById("video_player").webkitRequestFullScreen();
+        }
+        if(docElm.mozRequestFullScreen){
+          document.getElementById("video_player").mozRequestFullScreen();
+        }
+        if(docElm.msRequestFullscreen){
+          document.getElementById("video_player").msRequestFullscreen();
+        }
       }else{
-          if(document.exitFullscreen){
-      document.exitFullscreen();
-      }
-      if(document.mozCancelFullScreen){
-      document.mozCancelFullScreen();
-      }
-      if(document.webkitCancelFullScreen){
-      document.webkitCancelFullScreen();
-      }
-      if(document.msExitFullscreen){
-      document.msExitFullscreen();
-      }
+        if(document.exitFullscreen){
+          document.exitFullscreen();
+        }
+        if(document.mozCancelFullScreen){
+          document.mozCancelFullScreen();
+        }
+        if(document.webkitCancelFullScreen){
+          document.webkitCancelFullScreen();
+        }
+        if(document.msExitFullscreen){
+          document.msExitFullscreen();
+        }
       }
     });
   },
@@ -495,22 +498,20 @@ var VideoPlayer = React.createClass({
     });
   },
   seekVideo: function(evt){
-  var progress_barElm = evt.target;
-  if(progress_barElm.className != 'progress_bar_ref'){
-    progress_barElm = evt.target.parentElement;
-  };
-  var progBarDims = progress_barElm.getBoundingClientRect();
-  var clickPos = evt.clientX - progBarDims.left + 5;  // 5 correction factor
-  var ratio = (progBarDims.width < this.state.duration) ? (progBarDims.width / this.state.duration) : (this.state.duration / progBarDims.width);
-  var seekPos = (clickPos * ratio);
-  document.getElementById("video").currentTime = seekPos;
+    var progress_barElm = evt.target;
+    if(progress_barElm.className != 'progress_bar_ref'){
+      progress_barElm = evt.target.parentElement;
+    };
+    var progBarDims = progress_barElm.getBoundingClientRect();
+    var clickPos = evt.clientX - progBarDims.left + 5;  // 5 correction factor
+    document.getElementById("video").currentTime = clickPos*this.state.duration/progBarDims.width;
   },
   render: function(){
     return (
       <div>
       { (this.state.url!='') ? (
           <div className="video_player" id="video_player">
-          <Video ref="video"
+            <Video ref="video"
                url={"https://flower.limsi.fr/"+this.state.url+".mp4"}
                volume={this.state.volumeLevel}
                currentTimeChanged={this.updateProgressBar}
