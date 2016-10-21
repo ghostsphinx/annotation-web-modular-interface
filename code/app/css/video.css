@@ -3,13 +3,13 @@
 .video_player {
   background-color: #000;
   width: 640px;
-  height: 360px;
+  height: 400px;
   overflow: hidden;
   position: relative;
   text-align: center; }
   .video_player video {
     max-width: 100%;
-    height: inherit; }
+    height: 360px; }
   .video_player .video_controls {
     height: 30px;
     position: absolute;
@@ -128,7 +128,7 @@
       .video_player .video_controls .time .total {
         color: #999; }
     .video_player .video_controls .progress_bar {
-      height: 5px;
+      height: 10px;
       position: absolute;
       left: 0;
       right: 0;
