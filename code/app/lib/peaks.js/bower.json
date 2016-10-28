@@ -1,0 +1,17 @@
+{
+  "name": "peaks.js",
+  "main": "src/main.js",
+  "ignore": [
+    ".jshintrc",
+    "**/*.txt",
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "test_data"
+  ],
+  "dependencies": {
+    "requirejs": "~2.1.14"
+  },
+  "devDependencies": {}
+}
