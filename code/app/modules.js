@@ -432,8 +432,10 @@ var VideoPlayer = React.createClass({
     }, function(){
       if (this.state.playing){
         document.getElementById("video").play();
+        PubSub.publish('togglePlay','play');
       }else{
         document.getElementById("video").pause();
+        PubSub.publish('togglePlay','pause');
       }
     });
   },
@@ -505,11 +507,13 @@ var VideoPlayer = React.createClass({
     var progBarDims = progress_barElm.getBoundingClientRect();
     var clickPos = evt.clientX - progBarDims.left + 5;  // 5 correction factor
     document.getElementById("video").currentTime = clickPos*this.state.duration/progBarDims.width;
+    PubSub.publish('seekTime',{origin:"video",t:document.getElementById("video").currentTime});
   },
   render: function(){
     return (
       <div>
       { (this.state.url!='') ? (
+        <div>
           <div className="video_player" id="video_player">
             <Video ref="video"
                url={"https://flower.limsi.fr/"+this.state.url+".mp4"}
@@ -528,6 +532,7 @@ var VideoPlayer = React.createClass({
               </div>
             </div>
           </div>
+        </div>
         ) : (
           <div></div>
         )}
@@ -535,6 +540,73 @@ var VideoPlayer = React.createClass({
     );
   }
 });
+
+//--------------------------WAVEFORM PLAYER MODULE---------------------------------------
+class Waveform extends React.Component {
+
+  constructor(){
+    super();
+    this.state = {
+      url:''
+    };
+    var p;
+    var sub;
+    var nbSub;
+  }
+
+  componentDidMount(){
+    this.sub = {};
+    this.nbSub = 0;
+    var me = this;
+    var urlSub = function( msg, data ){
+      me.setState({url:data});
+      if(me.p != undefined) me.p.destroy();
+      me.p = Peaks.init({
+        container: document.getElementById('waveform'),
+        mediaElement: document.getElementById("audio")
+      });
+    };
+    this.sub[this.nbSub] = PubSub.subscribe('medium_url',urlSub);
+    this.nbSub++;
+    var togglePlaySub = function(msg, data){
+      if(data=="pause"){
+        document.getElementById('audio').pause();
+      }
+      else if(data=="play"){
+        document.getElementById('audio').play();
+      }
+    };
+    this.sub[this.nbSub] = PubSub.subscribe('togglePlay',togglePlaySub);
+    this.nbSub++;
+    var seekTimeSub = function(msg, data){
+      if(data.origin!="audio") me.p.time.setCurrentTime(data.t);
+    };
+    this.sub[this.nbSub] = PubSub.subscribe('seekTime',seekTimeSub);
+    this.nbSub++;
+  }
+
+  componentWillUnmount(){
+    var i;
+    for (i=this.nbSub-1; i>=0; i--){
+      PubSub.unsubscribe(this.sub[i]);
+    }
+  }
+
+  render(){
+    return(
+      <div>
+        { (this.state.url!='') ? (
+          <div>
+            <div className="waveform" id="waveform"></div>
+            <audio id="audio" src={"https://flower.limsi.fr/"+this.state.url+".mp4"}/>
+          </div>
+        ) : (
+          <div id="waveform" hidden></div>
+        )}
+      </div>
+    );
+  }
+}
 
 //--------------------------HEADER MODULE-----------------------------------------------
 class Header extends React.Component {
@@ -559,6 +631,7 @@ class Annotation extends React.Component {
         <CorpusSelection/>
         <MediumSelection/>
         <VideoPlayer/>
+        <Waveform/>
       </div>
     );
   }
