@@ -25,6 +25,11 @@ fetch('http://localhost:8070/config')
   else console.log('fail to get configuration');
 });
 
+var Peaks;
+require(['/lib/peaks.js/peaks.js'], function(peaks){
+  Peaks = peaks;
+});
+
 var PubSub;
 require(["/lib/PubSubJS-1.5.3/src/pubsub.js"], function(pubsub){
   PubSub = pubsub;
