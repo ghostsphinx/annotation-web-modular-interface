@@ -1,5 +1,9 @@
 
 
+.waveform{
+  width:640px;
+}
+
 .video_player {
   background-color: #000;
   width: 640px;
