@@ -73,8 +73,6 @@ class Log extends React.Component{
       session.name = "";
       session.isAuth = me.state.authenticated;
       PubSub.publish('isAuth',false);
-      PubSub.publish('corpus_id','');
-      PubSub.publish('medium_id','');
     });
   }
 
@@ -137,13 +135,14 @@ class CorpusSelection extends React.Component {
 
   handleChangeCorpus(event){
     var val = event.target.value-1;
+    var me= this;
     if(val>0){
       Camomile.getCorpora(function(err, data){
-        PubSub.publish('corpus_id', data[val]._id);
+        PubSub.publish(me.props.layer+'.corpus_id', data[val]._id);
       });
     }
     else {
-      PubSub.publish('corpus_id', '');
+      PubSub.publish(me.props.layer+'.corpus_id', '');
     }
   }
 
@@ -177,9 +176,9 @@ class MediumSelection extends React.Component {
     var me = this;
     var corpusSub = function( msg, data ){
       me.setState({corpus_id:data});
-      if(me.state.corpus_id=='') PubSub.publish('medium_url', '');
+      if(me.state.corpus_id=='') PubSub.publish(me.props.layer+'.medium_url', '');
     };
-    this.sub = PubSub.subscribe('corpus_id',corpusSub);
+    this.sub = PubSub.subscribe(me.props.layer+'.corpus_id',corpusSub);
   }
 
   componentWillUnmount(){
@@ -223,13 +222,14 @@ class MediumSelection extends React.Component {
   handleChangeMedium(event){
     var val = event.target.value-1;
     var options = {filter:{corpus_id:''}};
+    var me = this;
     if(val>0){
       options.filter.id_corpus = this.state.corpus_id;
       Camomile.getMedia(function(err, data){
-        PubSub.publish('medium_url', data[val].url);
+        PubSub.publish(me.props.layer+'.medium_url', data[val].url);
       },options);
     }
-    else PubSub.publish('medium_url', '');
+    else PubSub.publish(me.props.layer+'.medium_url', '');
   }
 
   render(){
@@ -256,23 +256,31 @@ Number.prototype.toVideoDuration = function(){
   group.push((seconds > 9) ? seconds : "0" + seconds);
 
   return group.join(":");
-}
+};
 
-var VideoFullScreenToggleButton = React.createClass({
-  requestFullscreen: function(){
+class VideoFullScreenToggleButton extends React.Component {
+
+  constructor(){
+    super();
+    this.requestFullscreen = this.requestFullscreen.bind(this);
+  }
+
+  requestFullscreen(){
     this.props.onToggleFullscreen();
-  },
-  render: function(){
+  }
+
+  render(){
     return (
       <button className="toggle_fullscreen_button" onClick={this.requestFullscreen}>
         <i className="glyphicon glyphicon-fullscreen"></i>
       </button>
     );
   }
-});
+}
 
-var VideoTimeIndicator = React.createClass({
-  render: function(){
+class VideoTimeIndicator extends React.Component {
+
+  render(){
     var current = (this.props.currentTime).toVideoDuration();
     var duration = (this.props.duration).toVideoDuration();
     return (
@@ -281,16 +289,25 @@ var VideoTimeIndicator = React.createClass({
       </div>
     );
   }
-});
+}
 
-var VideoVolumeButton = React.createClass({
-  toggleVolume: function(){
+class VideoVolumeButton extends React.Component {
+
+  constructor(){
+    super();
+    this.toggleVolume = this.toggleVolume.bind(this);
+    this.changeVolume = this.changeVolume.bind(this);
+  }
+
+  toggleVolume(){
     this.props.toggleVolume(!this.props.muted);
-  },
-  changeVolume: function(e){
+  }
+
+  changeVolume(e){
     this.props.changeVolume(e.target.value);
-  },
-  render: function(){
+  }
+
+  render(){
     var volumeLevel = this.props.volumeLevel, level;
     if(!this.props.muted){
       if (volumeLevel <= 0){
@@ -318,10 +335,11 @@ var VideoVolumeButton = React.createClass({
       </div>
     );
   }
-});
+}
 
-var VideoPlaybackToggleButton = React.createClass({
-  render: function(){
+class VideoPlaybackToggleButton extends React.Component {
+
+  render(){
     var icon = this.props.playing ? (<i className="glyphicon glyphicon-pause"></i>) : (<i className="glyphicon glyphicon-play"></i>);
     return (
       <button className="toggle_playback" onClick={this.props.handleTogglePlayback}>
@@ -329,10 +347,11 @@ var VideoPlaybackToggleButton = React.createClass({
       </button>
     );
   }
-});
+}
 
-var VideoProgressBar = React.createClass({
-  render: function(){
+class VideoProgressBar extends React.Component {
+
+  render(){
     var playedStyle = {width: this.props.percentPlayed + '%'}
     var bufferStyle = {width: this.props.percentBuffered + '%'}
     return (
@@ -342,22 +361,35 @@ var VideoProgressBar = React.createClass({
       </div>
     );
   }
-});
+}
 
-var Video = React.createClass({
-  updateCurrentTime: function(times){
+class Video extends React.Component {
+
+  constructor(){
+    super();
+    this.updateCurrentTime = this.updateCurrentTime.bind(this);
+    this.updateDuration = this.updateDuration.bind(this);
+    this.playbackChanged = this.playbackChanged.bind(this);
+    this.updateBuffer = this.updateBuffer.bind(this);
+  }
+
+  updateCurrentTime(times){
     this.props.currentTimeChanged(times);
-  },
-  updateDuration: function(duration){
+  }
+
+  updateDuration(duration){
     this.props.durationChanged(duration);
-  },
-  playbackChanged: function(shouldPause){
+  }
+
+  playbackChanged(shouldPause){
     this.props.updatePlaybackStatus(shouldPause);
-  },
-  updateBuffer: function(buffered){
+  }
+
+  updateBuffer(buffered){
     this.props.bufferChanged(buffered);
-  },
-  componentDidMount: function(){
+  }
+
+  componentDidMount(){
     var video = document.getElementById("video");
 
     var me = this;
@@ -387,17 +419,20 @@ var Video = React.createClass({
         duration: e.target.duration
       });
     }, false)
-  },
-  render: function(){
+  }
+
+  render(){
     return (
       <video id="video" src={this.props.url}></video>
     );
   }
-});
+}
 
-var VideoPlayer = React.createClass({
-  getInitialState: function(){
-    return {
+class VideoPlayer extends React.Component {
+
+  constructor(){
+    super();
+    this.state = {
       url: '',
       playing: false,
       percentPlayed: 0,
@@ -406,61 +441,92 @@ var VideoPlayer = React.createClass({
       currentTime: 0,
       muted: false,
       volumeLevel: 0.5,
-      fullScreen: false,
-      sub: ''
+      fullScreen: false
     };
-  },
-  componentDidMount: function(){
+    var sub;
+    var nbSub;
+    this.videoEnded = this.videoEnded.bind(this);
+    this.togglePlayback = this.togglePlayback.bind(this);
+    this.updateDuration = this.updateDuration.bind(this);
+    this.updateBufferBar = this.updateBufferBar.bind(this);
+    this.updateProgressBar = this.updateProgressBar.bind(this);
+    this.toggleMute = this.toggleMute.bind(this);
+    this.toggleFullscreen = this.toggleFullscreen.bind(this);
+    this.handleVolumeChange = this.handleVolumeChange.bind(this);
+    this.seekVideo = this.seekVideo.bind(this);
+  }
+
+  componentDidMount(){
+    this.sub = {};
+    this.nbSub = 0;
     var me = this;
     var urlSub = function( msg, data ){
       me.setState({url:data});
     };
-    this.sub = PubSub.subscribe('medium_url',urlSub);
-  },
-  componentWillUnmount: function(){
-    PubSub.unsubscribe(this.sub);
-  },
-  videoEnded: function(){
+    this.sub[this.nbSub] = PubSub.subscribe(me.props.layer+'.medium_url',urlSub);
+    this.nbSub++;
+    var seekTimeSub = function(msg, data){
+      if(data.origin!=me.props.id) document.getElementById("video").currentTime = data.t;
+    };
+    this.sub[this.nbSub] = PubSub.subscribe(me.props.layer+'.seekTime',seekTimeSub);
+    this.nbSub++;
+  }
+
+  componentWillUnmount(){
+    var i;
+    for (i=this.nbSub-1; i>=0; i--){
+      PubSub.unsubscribe(this.sub[i]);
+    }
+  }
+
+  videoEnded(){
     this.setState({
       percentPlayed: 100,
       playing: false
     });
-  },
-  togglePlayback: function(){
+  }
+
+  togglePlayback(){
+    var me= this;
     this.setState({
       playing: !this.state.playing
     }, function(){
       if (this.state.playing){
         document.getElementById("video").play();
-        PubSub.publish('togglePlay','play');
+        PubSub.publish(me.props.layer+'.togglePlay','play');
       }else{
         document.getElementById("video").pause();
-        PubSub.publish('togglePlay','pause');
+        PubSub.publish(me.props.layer+'.togglePlay','pause');
       }
     });
-  },
-  updateDuration: function(duration){
+  }
+
+  updateDuration(duration){
     this.setState({duration: duration});
-  },
-  updateBufferBar: function(buffered){
+  }
+
+  updateBufferBar(buffered){
     this.setState({percentBuffered: buffered});
-  },
-  updateProgressBar: function(times){
+  }
+
+  updateProgressBar(times){
     var percentPlayed = Math.floor((100 / times.duration) * times.currentTime);
     this.setState({
       currentTime: times.currentTime,
       percentPlayed: percentPlayed,
       duration: times.duration
     });
-  },
-  toggleMute: function(){
+  }
+
+  toggleMute(){
     this.setState({
       muted: !this.state.muted
     }, function(){
       document.getElementById("video").muted = this.state.muted;
     });
-  },
-  toggleFullscreen: function(){
+  }
+
+  toggleFullscreen(){
     this.setState({
       fullScreen: !this.state.fullScreen
     }, function(){
@@ -493,13 +559,15 @@ var VideoPlayer = React.createClass({
         }
       }
     });
-  },
-  handleVolumeChange: function(value){
+  }
+
+  handleVolumeChange(value){
     this.setState({volumeLevel: value / 100}, function(){
       document.getElementById("video").volume = this.state.volumeLevel;
     });
-  },
-  seekVideo: function(evt){
+  }
+
+  seekVideo(evt){
     var progress_barElm = evt.target;
     if(progress_barElm.className != 'progress_bar_ref'){
       progress_barElm = evt.target.parentElement;
@@ -507,9 +575,10 @@ var VideoPlayer = React.createClass({
     var progBarDims = progress_barElm.getBoundingClientRect();
     var clickPos = evt.clientX - progBarDims.left + 5;  // 5 correction factor
     document.getElementById("video").currentTime = clickPos*this.state.duration/progBarDims.width;
-    PubSub.publish('seekTime',{origin:"video",t:document.getElementById("video").currentTime});
-  },
-  render: function(){
+    PubSub.publish(this.props.layer+'.seekTime',{origin:this.props.id,t:document.getElementById("video").currentTime});
+  }
+
+  render(){
     return (
       <div>
       { (this.state.url!='') ? (
@@ -539,7 +608,7 @@ var VideoPlayer = React.createClass({
       </div>
     );
   }
-});
+}
 
 //--------------------------WAVEFORM PLAYER MODULE---------------------------------------
 class Waveform extends React.Component {
@@ -565,8 +634,11 @@ class Waveform extends React.Component {
         container: document.getElementById('waveform'),
         mediaElement: document.getElementById("audio")
       });
+      document.getElementById("waveform").onclick = function(){
+        PubSub.publish(me.props.layer+'.seekTime',{origin:me.props.id,t:me.p.time.getCurrentTime()});
+      };
     };
-    this.sub[this.nbSub] = PubSub.subscribe('medium_url',urlSub);
+    this.sub[this.nbSub] = PubSub.subscribe(me.props.layer+'.medium_url',urlSub);
     this.nbSub++;
     var togglePlaySub = function(msg, data){
       if(data=="pause"){
@@ -576,12 +648,13 @@ class Waveform extends React.Component {
         document.getElementById('audio').play();
       }
     };
-    this.sub[this.nbSub] = PubSub.subscribe('togglePlay',togglePlaySub);
+    this.sub[this.nbSub] = PubSub.subscribe(me.props.layer+'.togglePlay',togglePlaySub);
     this.nbSub++;
     var seekTimeSub = function(msg, data){
-      if(data.origin!="audio") me.p.time.setCurrentTime(data.t);
+      if(data.origin!=me.props.id) me.p.time.setCurrentTime(data.t);
+      console.log("");
     };
-    this.sub[this.nbSub] = PubSub.subscribe('seekTime',seekTimeSub);
+    this.sub[this.nbSub] = PubSub.subscribe(me.props.layer+'.seekTime',seekTimeSub);
     this.nbSub++;
   }
 
@@ -628,10 +701,10 @@ class Annotation extends React.Component {
   render(){
     return(
       <div className="container">
-        <CorpusSelection/>
-        <MediumSelection/>
-        <VideoPlayer/>
-        <Waveform/>
+        <CorpusSelection layer="layer1"/>
+        <MediumSelection layer="layer1"/>
+        <VideoPlayer id="video" layer="layer1"/>
+        <Waveform id="audio" layer="layer1"/>
       </div>
     );
   }
