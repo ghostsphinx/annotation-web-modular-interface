@@ -671,7 +671,7 @@ class Waveform extends React.Component {
         { (this.state.url!='') ? (
           <div>
             <div className="waveform" id="waveform"></div>
-            <audio id="audio" src={"https://flower.limsi.fr/"+this.state.url+".mp4"}/>
+            <audio id="audio" src={"https://flower.limsi.fr/"+this.state.url+".mp4"} muted/>
           </div>
         ) : (
           <div id="waveform" hidden></div>
