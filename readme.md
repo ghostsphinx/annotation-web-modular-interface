@@ -55,7 +55,7 @@ The architecture of the front-end is in the "app" folder :
 
 For every React Component, there are two ways of changing, functionnal part (js) and render part (html).
 With the render part (function render in React modules):
-	You know that all begin with Application.jsx, it defined how your website will look like, header, annotation and footer. If the header or the footer don't match your taste, you are free to change them, in the example, the annotation part appears only when the user is logged.
-	If you want to change the disposition of the annotation part, look at Annotation.jsx, where some modules can appear when you want them to, you can use Bootstrap (but remember _class_ is spelled _className_). You can use every modules that are at your disposal (they are few, so you are free to implement new ones).
+*	You know that all begin with Application.jsx, it defined how your website will look like, header, annotation and footer. If the header or the footer don't match your taste, you are free to change them, in the example, the annotation part appears only when the user is logged.
+*	If you want to change the disposition of the annotation part, look at Annotation.jsx, where some modules can appear when you want them to, you can use Bootstrap (but remember _class_ is spelled _className_). You can use every modules that are at your disposal (they are few, so you are free to implement new ones).
 With the functionnal part (every other functions) :
-	Look how you can add and use a function in React, and there will be no problem. Remember the publish-subscribe system the pass data from one module to another.
+*	Look how you can add and use a function in React, and there will be no problem. Remember the publish-subscribe system the pass data from one module to another.
