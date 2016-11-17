@@ -1,0 +1,79 @@
+import React from 'react';
+import PubSub from 'pubsub-js';
+import Peaks from 'peaks.js';
+
+export default class Waveform extends React.Component {
+
+  constructor(){
+    super();
+    this.state = {
+      url:''
+    };
+    var p;
+    var sub;
+    var nbSub;
+  }
+
+  componentDidMount(){
+    this.sub = {};
+    this.nbSub = 0;
+    var me = this;
+    var urlSub = function( msg, data ){
+      me.setState({url:data});
+      me.p = Peaks.init({
+        container: document.getElementById('waveform'),
+        mediaElement: document.getElementById("audio")
+      });
+      document.getElementById("waveform").onclick = function(){
+        PubSub.publish(me.props.layer+'.seekTime',{origin:me.props.id,t:me.p.time.getCurrentTime()});
+      };
+    };
+    this.sub[this.nbSub] = PubSub.subscribe(me.props.layer+'.medium_url',urlSub);
+    this.nbSub++;
+    var togglePlaySub = function(msg, data){
+      if(data=="pause"){
+        document.getElementById('audio').pause();
+      }
+      else if(data=="play"){
+        document.getElementById('audio').play();
+      }
+    };
+    this.sub[this.nbSub] = PubSub.subscribe(me.props.layer+'.togglePlay',togglePlaySub);
+    this.nbSub++;
+    var seekTimeSub = function(msg, data){
+      if(data.origin!=me.props.id) me.p.time.setCurrentTime(data.t);
+      console.log("");
+    };
+    this.sub[this.nbSub] = PubSub.subscribe(me.props.layer+'.seekTime',seekTimeSub);
+    this.nbSub++;
+  }
+
+  componentWillUpdate(){
+    if(this.p != undefined){
+      console.log(this.p);
+      this.p.destroy();
+    }
+  }
+
+  componentWillUnmount(){
+    var i;
+    for (i=this.nbSub-1; i>=0; i--){
+      PubSub.unsubscribe(this.sub[i]);
+    }
+  }
+
+  render(){
+    return(
+      <div>
+        { (this.state.url!='') ? (
+          <div>
+            <div className="waveform" id="waveform"></div>
+            <audio id="audio" src={"https://flower.limsi.fr/"+this.state.url+".mp4"} muted/>
+          </div>
+        ) : (
+          <div id="waveform" hidden></div>
+        )}
+      </div>
+    );
+  }
+}
