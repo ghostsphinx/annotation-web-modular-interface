@@ -815,7 +815,6 @@ module.exports = React.createClass({displayName: "exports",
     this.nbSub++;
     var seekTimeSub = function(msg, data){
       if(data.origin!=me.props.id) me.p.time.setCurrentTime(data.t);
-      console.log("");
     };
     this.sub[this.nbSub] = PubSub.subscribe(me.props.layer+'.seekTime',seekTimeSub);
     this.nbSub++;
