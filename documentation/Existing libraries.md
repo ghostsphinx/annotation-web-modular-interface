@@ -11,11 +11,12 @@ Existing libraries:
 		need to convert audio file to waveform file with a C++ software
 
 		For our use, it is unsuable since we can't have waveform files.
+		EDIT: Waveform files are not necessary anymore.
 
 	wavesurfer.js:
 		Simple waveform from HTLM5 audio
 
-		It's simple, it has few functions, it is a module that we can use
+		It's simple, it has few functions, it is a module that we can use.
 
 	wave.js:
 		Only theory, no code.
